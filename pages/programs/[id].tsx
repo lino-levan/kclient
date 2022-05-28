@@ -5,31 +5,10 @@ import Image from 'next/image'
 import Editor from "@monaco-editor/react"
 import { useEffect, useRef, useState } from 'react'
 
-interface IProgram {
-  creatorProfile: {
-    avatarSrc: string
-    nickname: string
-  }
-  scratchpad: {
-    height: number
-    width: number
-    id: number
-    revision: {
-      code: string
-    }
-    spinoffCount: number
-    sumVotesIncremented: number
-    title: string
-    type: string
-    userAuthoredContentType: string
-    url: string
-  }
-}
+import { IProgram } from '../../lib/types'
 
 const Home: NextPage<{program?: IProgram}> = (props) => {
   const program = props.program
-
-  console.log(program)
 
   const iframe = useRef(null)
   const [code, setCode] = useState(program?.scratchpad.revision.code || "")
