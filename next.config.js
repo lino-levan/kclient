@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['www.khanacademy.org'],
+    domains: ['www.khanacademy.org', 'cdn.kastatic.org'],
   },
 }
 

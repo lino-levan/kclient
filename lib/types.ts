@@ -32,3 +32,12 @@ export interface IProgram {
     url: string
   }
 }
+
+export interface IProfile {
+  bio: string
+  id: string
+  joined: string
+  nickname: string
+  points: number
+  username: string
+}
