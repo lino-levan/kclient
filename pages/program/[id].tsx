@@ -1,6 +1,5 @@
 import type { GetServerSideProps, NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 
 import Editor from "@monaco-editor/react"
 import { useEffect, useRef, useState } from 'react'
@@ -62,7 +61,7 @@ const Home: NextPage<{program?: IProgram}> = (props) => {
             onChange={(newValue) => setCode(newValue || "")}
           />
         <div>
-          <iframe ref={iframe} title={program.scratchpad.title} width={program.scratchpad.width} height={program.scratchpad.height}></iframe>
+          <iframe ref={iframe} title={program.scratchpad.title} width={Math.max(program.scratchpad.width, program.scratchpad.height)} height={program.scratchpad.height}></iframe>
         </div>
        </div>
        <div className="flex justify-center gap-10">
