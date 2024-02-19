@@ -33,12 +33,15 @@ const Home: NextPage<{new: IPreviewProgram[]}> = (props) => {
 export default Home
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const newRaw = await fetch(`https://www.khanacademy.org/api/internal/scratchpads/top?casing=camel&sort=2&page=0&limit=30&topic_id=xffde7c31&lang=en`)
-  const newPosts = await newRaw.json()
+  const newRes = await fetch("https://www.khanacademy.org/api/internal/graphql/hotlist?lang=en", {
+    "body": "{\"operationName\":\"hotlist\",\"query\":\"query hotlist($curationNodeId: String, $onlyOfficialProjectSpinoffs: Boolean!, $sort: ListProgramSortOrder, $pageInfo: ListProgramsPageInfo) {\\n  listTopPrograms(\\n    curationNodeId: $curationNodeId\\n    onlyOfficialProjectSpinoffs: $onlyOfficialProjectSpinoffs\\n    sort: $sort\\n    pageInfo: $pageInfo\\n  ) {\\n    complete\\n    cursor\\n    programs {\\n      id\\n      key\\n      authorKaid\\n      authorNickname\\n      displayableSpinoffCount\\n      imagePath\\n      sumVotesIncremented\\n      translatedTitle: title\\n      url\\n      __typename\\n    }\\n    __typename\\n  }\\n}\",\"variables\":{\"curationNodeId\":\"xffde7c31\",\"onlyOfficialProjectSpinoffs\":false,\"sort\":\"RECENT\",\"pageInfo\":{\"itemsPerPage\":30,\"cursor\":\"\"}}}",
+    "method": "POST",
+  });
+  const newPosts = await newRes.json()
 
   return {
     props: {
-      new: newPosts.scratchpads
+      new: newPosts.data.listTopPrograms.programs
     },
   }
 }

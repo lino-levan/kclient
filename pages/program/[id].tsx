@@ -10,23 +10,25 @@ const Home: NextPage<{program?: IProgram}> = (props) => {
   const program = props.program
 
   const iframe = useRef(null)
-  const [code, setCode] = useState(program?.scratchpad.revision.code || "")
+  const [code, setCode] = useState(program?.revision.code || "")
 
   useEffect(() => {
     if(iframe && iframe.current) {
       let page = ""
 
-      if(program?.scratchpad.userAuthoredContentType === "webpage") {
+      console.log(program?.userAuthoredContentType)
+
+      if(program?.userAuthoredContentType === "WEBPAGE") {
         page = code
       }
 
-      if(program?.scratchpad.userAuthoredContentType === "pjs") {
+      if(program?.userAuthoredContentType === "PJS") {
         page = `
         <html>
           <head>
           </head>
           <body style="margin:0px;padding:0px;overflow:none;">
-            <canvas id="kdraw" width="${program.scratchpad.width}" height="${program.scratchpad.height}"></canvas>
+            <canvas id="kdraw" width="${program.width}" height="${program.height}"></canvas>
             <script src="https://cdn.jsdelivr.net/gh/lino-levan/kdraw.js@main/kdraw.js" type="text/javascript"></script>
             <script>${code}</script>
           </body>
@@ -50,23 +52,23 @@ const Home: NextPage<{program?: IProgram}> = (props) => {
       </Head>
 
       <main className="p-10 text-slate-500 flex flex-col gap-10">
-       <h1 className="text-4xl text-center text-slate-800">{program.scratchpad.title}</h1>
-       <div className="grid grid-flow-col outline outline-1 outline-slate-300" style={{height:program.scratchpad.height}}>
+       <h1 className="text-4xl text-center text-slate-800">{program.title}</h1>
+       <div className="grid grid-flow-col outline outline-1 outline-slate-300" style={{height:program.height}}>
         <Editor
-            height={program.scratchpad.height}
-            defaultLanguage={program.scratchpad.userAuthoredContentType === 'webpage' ? 'html' : 'javascript'}
-            defaultValue={program.scratchpad.revision.code}
+            height={program.height}
+            defaultLanguage={program.userAuthoredContentType === 'webpage' ? 'html' : 'javascript'}
+            defaultValue={program.revision.code}
             loading=""
             options={{minimap: {enabled: false}}}
             onChange={(newValue) => setCode(newValue || "")}
           />
         <div>
-          <iframe ref={iframe} title={program.scratchpad.title} width={Math.max(program.scratchpad.width, program.scratchpad.height)} height={program.scratchpad.height}></iframe>
+          <iframe ref={iframe} title={program.title} width={Math.max(program.width, program.height)} height={program.height}></iframe>
         </div>
        </div>
        <div className="flex justify-center gap-10">
-         <p className="bg-blue-600 text-white px-4 py-2 rounded">{program.scratchpad.sumVotesIncremented} Votes</p>
-         <a className="bg-blue-600 text-white px-4 py-2 rounded" href={program.scratchpad.url} target="_blank" rel="noreferrer">View on Khanacademy</a>
+         <p className="bg-blue-600 text-white px-4 py-2 rounded">{program.sumVotesIncremented} Votes</p>
+         <a className="bg-blue-600 text-white px-4 py-2 rounded" href={program.url} target="_blank" rel="noreferrer">View on Khanacademy</a>
        </div>
       </main>
     </div>
@@ -80,12 +82,17 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
   if(!id) return { props: {} }
 
-  const programRaw = await fetch(`https://www.khanacademy.org/api/internal/show_scratchpad?scratchpad_id=${id}&casing=camel&topic_slug=computer-programming&lang=en`)
+  const programRaw = await fetch("https://www.khanacademy.org/api/internal/graphql/programQuery?lang=en", {
+    "body": `{\"operationName\":\"programQuery\",\"query\":\"query programQuery($programId: String!) {\\n  programById(id: $programId) {\\n    byChild\\n    category\\n    created\\n    creatorProfile: author {\\n      id\\n      nickname\\n      profileRoot\\n      profile {\\n        accessLevel\\n        __typename\\n      }\\n      __typename\\n    }\\n    deleted\\n    description\\n    spinoffCount: displayableSpinoffCount\\n    docsUrlPath\\n    flags\\n    flaggedBy: flaggedByKaids\\n    flaggedByUser: isFlaggedByCurrentUser\\n    height\\n    hideFromHotlist\\n    id\\n    imagePath\\n    isProjectOrFork: originIsProject\\n    isOwner\\n    kaid: authorKaid\\n    key\\n    newUrlPath\\n    originScratchpad: originProgram {\\n      deleted\\n      translatedTitle\\n      url\\n      __typename\\n    }\\n    restrictPosting\\n    revision: latestRevision {\\n      id\\n      code\\n      configVersion\\n      created\\n      editorType\\n      folds\\n      __typename\\n    }\\n    slug\\n    sumVotesIncremented\\n    title\\n    topic: parentCurationNode {\\n      id\\n      nodeSlug: slug\\n      relativeUrl\\n      slug\\n      translatedTitle\\n      __typename\\n    }\\n    translatedTitle\\n    url\\n    userAuthoredContentType\\n    upVoted\\n    width\\n    __typename\\n  }\\n}\",\"variables\":{\"programId\":\"${id}\"}}`,
+    "method": "POST",
+  });
   const program = await programRaw.json()
+
+  console.log(program.data.programById)
 
   return {
     props: {
-      program
+      program: program.data.programById
     },
   }
 }

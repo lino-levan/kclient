@@ -33,12 +33,15 @@ const Home: NextPage<{top: IPreviewProgram[]}> = (props) => {
 export default Home
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const topRaw = await fetch(`https://www.khanacademy.org/api/internal/scratchpads/top?casing=camel&sort=5&page=0&limit=30&topic_id=xffde7c31&lang=en`)
+  const topRaw = await fetch("https://www.khanacademy.org/api/internal/graphql/hotlist?lang=en", {
+    "body": "{\"operationName\":\"hotlist\",\"query\":\"query hotlist($curationNodeId: String, $onlyOfficialProjectSpinoffs: Boolean!, $sort: ListProgramSortOrder, $pageInfo: ListProgramsPageInfo) {\\n  listTopPrograms(\\n    curationNodeId: $curationNodeId\\n    onlyOfficialProjectSpinoffs: $onlyOfficialProjectSpinoffs\\n    sort: $sort\\n    pageInfo: $pageInfo\\n  ) {\\n    complete\\n    cursor\\n    programs {\\n      id\\n      key\\n      authorKaid\\n      authorNickname\\n      displayableSpinoffCount\\n      imagePath\\n      sumVotesIncremented\\n      translatedTitle: title\\n      url\\n      __typename\\n    }\\n    __typename\\n  }\\n}\",\"variables\":{\"curationNodeId\":\"xffde7c31\",\"onlyOfficialProjectSpinoffs\":false,\"sort\":\"UPVOTE\",\"pageInfo\":{\"itemsPerPage\":30,\"cursor\":\"\"}}}",
+    "method": "POST",
+  });
   const top = await topRaw.json()
 
   return {
     props: {
-      top: top.scratchpads
+      top: top.data.listTopPrograms.programs
     },
   }
 }
